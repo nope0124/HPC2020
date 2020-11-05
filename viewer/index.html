@@ -1,0 +1,70 @@
+<!--
+HAL Programming Contest 2020 Viewer
+(C)HAL Laboratory, Inc.
+ -->
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<title>viewer</title>
+<div>
+  <div>
+    <input @change="import" @click="reset" type="file" class="import">
+    <div>ここにファイルをドラッグ＆ドロップできます</div>
+  </div>
+  <span v-show="json" v-text="'Total turn: '+totalTurn()"></span>
+  <div class="control" v-show="json">
+    <section class="stage">
+      <h1>Stage</h1>
+      <div class="stagebuttons">
+        <button v-for="(i,s) in stages" :class="stage===i?'current':''" @click="stage=i" :style="{background:stageColor(i)}"></button>
+      </div>
+      <div>
+        <button @click="stage=0" :disabled="isPlay||stage==0">&lt;&lt;</button>
+        <button @click="stage--" :disabled="isPlay||stage==0">&lt;</button>
+        <input v-model="stage" :disabled="isPlay" type="number"><span v-text="'/'+(stages.length-1)"></span>
+        <button @click="stage++" :disabled="isPlay||stage>=stages.length-1">&gt;</button>
+        <button @click="stage=stages.length-1" :disabled="isPlay||stage>=stages.length-1">&gt;&gt;</button>
+      </div>
+    </section>
+    <section class="turn">
+      <h1>Turn</h1>
+      <div>
+        <button @click="turn=0" :disabled="isPlay||turn==0">&lt;&lt;</button>
+        <button @click="turn--" :disabled="isPlay||turn==0">&lt;</button>
+        <input v-model="turn" :disabled="isPlay" type="number"><span v-text="'/'+(turns.length-1)"></span>
+        <button @click="turn++" :disabled="isPlay||turn>=turns.length-1">&gt;</button>
+        <button @click="turn=turns.length-1" :disabled="isPlay||turn>=turns.length-1">&gt;&gt;</button>
+      </div>
+      <div @mousedown="drag($event)" id="slider">
+        <div></div>
+        <div @mouseup="isDrag=false" @mouseout="isDrag=false" @mousemove="drag($event)" v-show="isDrag" class="mask"></div>
+      </div>
+    </section>
+    <section class="play">
+      <h1>Play</h1>
+      <div>
+        <button @click="isPlay=!isPlay" v-text="isPlay?'停止':'再生'"></button>
+        <label><input v-model="playType" type="radio" value="0">通常再生</label>
+        <label><input v-model="playType" type="radio" value="1">繰り返し</label>
+        <label><input v-model="playType" type="radio" value="2">連続再生</label>
+      </div>
+    </section>
+  </div>
+  <div v-if="json" style="position:relative">
+    <div class="field" :style="fieldStyle()">
+      <div v-for="ground in grounds" :data-kind="ground.kind"></div>
+    </div>
+    <div class="grid">
+      <div class="scroll" v-for="(i,scroll) in scrolls" :style="scrollStyle(scroll)" :data-no="i"></div>
+    </div>
+    <svg :width="stageWidth*20+'px'" :height="stageHeight*20+'px'" :view-box.camel="'0 0 '+stageWidth+' '+stageHeight">
+      <polyline stroke="#000" stroke-width="0.1" fill="none" :points="points" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle v-for="turn in turns" :cx="turn[0]" :cy="turn[1]" r="0.2" fill="#000"/>
+    </svg>
+    <div class="rabbit" :style="rabbitStyle()"></div>
+  </div>
+</div>
+<script src="vue.min.js"></script>
+<script src="main.js"></script>

@@ -1,0 +1,199 @@
+/*
+HAL Programming Contest 2020 Viewer
+(C)HAL Laboratory, Inc.
+*/
+@charset "UTF-8";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  outline: none;
+  padding: 0;
+}
+
+body {
+  color: #000;
+  font-size: 16px;
+  padding: 1rem;
+  user-select: none;
+}
+body > div {
+  align-items: start;
+  display: flex;
+  flex-direction: column
+}
+.control {
+  display: flex;
+  flex-wrap: wrap;
+}
+.control > section {
+  padding: 8px;
+}
+.stage {
+  width: 100%;
+}
+.stage > div:last-child {
+  white-space: nowrap;
+}
+.turn > div:first-of-type {
+  white-space: nowrap;
+}
+.play > div {
+  align-items: center;
+  display: flex;
+  white-space: nowrap;
+}
+.play > div > label {
+  align-items: center;
+  display: flex;
+  margin-left: 5px;
+}
+
+button {
+  background: #fff;
+  border: 1px solid #888;
+  border-radius: .4rem;
+  cursor: pointer;
+  font-size: inherit;
+  line-height: 1.2rem;
+  padding: .2rem .4rem;
+  white-space: nowrap;
+}
+button:hover {
+  opacity: .8;
+}
+button[disabled] {
+  opacity: .3;
+}
+
+input[type="number"] {
+  border: 1px solid #888;
+  border-radius: .5rem;
+  font-size: inherit;
+  padding: .2rem .4rem;
+  text-align: right;
+  width: 5rem;
+}
+
+.import {
+  border: 1px solid #ccc;
+  padding: 3rem;
+  position: relative;
+}
+.import + div {
+  font-size: 1rem;
+}
+
+#slider {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  display: inline-block;
+  line-height: 0;
+  position: relative;
+  width: 100%;
+}
+#slider > *:first-child {
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  cursor: move;
+  display: inline-block;
+  height: 1rem;
+  position: relative;
+  width: 1rem;
+}
+.mask {
+  background: #f00;
+  display: inline-block;
+  height: 100%;
+  left: 0;
+  opacity: 0;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1;
+}
+
+.stagebuttons {
+  display: flex;
+  flex-wrap: wrap;
+}
+.stagebuttons > button {
+  border: 2px solid;
+  border-color: rgba(255, 255, 255, .5) rgba(0, 0, 0, .5) rgba(0, 0, 0, .5) rgba(255, 255, 255, .5);
+  border-radius: 2px;
+  display: inline-block;
+  height: 16px;
+  padding: 0;
+  width: 16px;
+}
+.stagebuttons > button.current {
+  border-color: rgba(0, 0, 0, .5) rgba(255, 255, 255, .5) rgba(255, 255, 255, .5) rgba(0, 0, 0, .5);
+}
+
+.field {
+  display: grid;
+}
+.field > [data-kind="0"] {
+  background: greenyellow;
+}
+.field > [data-kind="1"] {
+  background: yellowgreen;
+}
+.field > [data-kind="2"] {
+  background: gold;
+}
+.field > [data-kind="3"] {
+  background: blue;
+}
+.field > [data-kind="4"] {
+  background: black;
+}
+
+.grid {
+  background-image:
+    linear-gradient(#0002 1px, transparent 0),
+    linear-gradient(90deg, #0002 1px, transparent 0),
+    linear-gradient(#0001 1.1px, transparent 0),
+    linear-gradient(90deg, #0001 1.1px, transparent 0);
+  background-size: 200px 200px, 200px 200px, 20px 20px, 20px 20px;
+  display: grid;
+  height: 100%;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+svg {
+  opacity: .3;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+}
+
+.rabbit {
+  background: #fff;
+  border-radius: 50%;
+  height: 16px;
+  position: absolute;
+  width: 16px;
+}
+
+.scroll {
+  background: #c00;
+  border-radius: 10%;
+  height: 16px;
+  position: absolute;
+  width: 16px;
+}
+.scroll:hover::after {
+  background: #000;
+  border-radius: .5rem;
+  color: #fff;
+  content: "巻物:"attr(data-no);
+  padding: .5rem;
+  position: absolute;
+  top: -3rem;
+  white-space: nowrap;
+  z-index: 1;
+}
