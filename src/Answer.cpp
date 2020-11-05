@@ -26,8 +26,8 @@ const int MAX_V=2500;
 struct edge{int to,cost;};
 #define rep(i, n) for(int i = int(0); i < int(n); i++)
 #define ALL(a)  (a).begin(),(a).end()
-int dx[4] = {-1, 1, 0, 0};
-int dy[4] = {0, 0, -1, 1};
+int dx[8] = {-1, 1, 0, 0, -1, -1, 1, 1};
+int dy[8] = {0, 0, -1, 1, -1, 1, -1, 1};
 int INF = 1e9;
 
 //------------------------------------------------------------------------------
@@ -78,17 +78,51 @@ vector<int> get_new_path(vector<int> vec) {
     vector<int> ret;
     int x = getX(vec[0]);
     int y = getY(vec[0]);
-    int dir = -1; //0ならy、1ならx
+    int dir = -1; //0ならy, 1ならx, 2なら左上, 3なら右上
     rep (i, vec.size()) {
         int warn = vec.size();
         if (i == warn - 1) {
             if (dir == 0) {
-                if (x != getX(vec[i])) {
+                if ((x + 1 == getX(vec[i]) && y - 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y + 1 == getY(vec[i]))) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 3;
+                } else if ((x + 1 == getX(vec[i]) && y + 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y - 1 == getY(vec[i]))) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 2;
+                } else if (x != getX(vec[i])) {
                     ret.push_back(vec[i - 1]);
                     dir = 1;
                 }
             } else if (dir == 1) {
-                if (y != getY(vec[i])) {
+                if ((x + 1 == getX(vec[i]) && y - 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y + 1 == getY(vec[i]))) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 3;
+                } else if ((x + 1 == getX(vec[i]) && y + 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y - 1 == getY(vec[i]))) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 2;
+                } else if (y != getY(vec[i])) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 0;
+                }
+            } else if (dir == 2) {
+                if ((x + 1 == getX(vec[i]) && y - 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y + 1 == getY(vec[i]))) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 3;
+                } else if (x != getX(vec[i]) && y == getY(vec[i])) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 1;
+                } else if (x == getX(vec[i]) && y != getY(vec[i])) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 0;
+                }
+            } else if (dir == 3) {
+                if ((x + 1 == getX(vec[i]) && y + 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y - 1 == getY(vec[i]))) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 2;
+                } else if (x != getX(vec[i]) && y == getY(vec[i])) {
+                    ret.push_back(vec[i - 1]);
+                    dir = 1;
+                } else if (x == getX(vec[i]) && y != getY(vec[i])) {
                     ret.push_back(vec[i - 1]);
                     dir = 0;
                 }
@@ -106,20 +140,62 @@ vector<int> get_new_path(vector<int> vec) {
                 dir = 0;
                 x = getX(vec[i]);
                 y = getY(vec[i]);
-            } else {
+            } else if (getX(vec[i]) != x && getY(vec[i]) == y){
                 dir = 1;
+                x = getX(vec[i]);
+                y = getY(vec[i]);
+            } else if ((getX(vec[i]) - 1 == x && getY(vec[i]) - 1 == y) || (getX(vec[i]) + 1 == x && getY(vec[i]) + 1 == y)) {
+                dir = 2;
+                x = getX(vec[i]);
+                y = getY(vec[i]);
+            } else {
+                dir = 3;
                 x = getX(vec[i]);
                 y = getY(vec[i]);
             }
             continue;
         }
         if (dir == 0) {
-            if (x != getX(vec[i])) {
+            if ((x + 1 == getX(vec[i]) && y - 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y + 1 == getY(vec[i]))) {
+                ret.push_back(vec[i - 1]);
+                dir = 3;
+            } else if ((x + 1 == getX(vec[i]) && y + 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y - 1 == getY(vec[i]))) {
+                ret.push_back(vec[i - 1]);
+                dir = 2;
+            } else if (x != getX(vec[i])) {
                 ret.push_back(vec[i - 1]);
                 dir = 1;
             }
         } else if (dir == 1) {
-            if (y != getY(vec[i])) {
+            if ((x + 1 == getX(vec[i]) && y - 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y + 1 == getY(vec[i]))) {
+                ret.push_back(vec[i - 1]);
+                dir = 3;
+            } else if ((x + 1 == getX(vec[i]) && y + 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y - 1 == getY(vec[i]))) {
+                ret.push_back(vec[i - 1]);
+                dir = 2;
+            } else if (y != getY(vec[i])) {
+                ret.push_back(vec[i - 1]);
+                dir = 0;
+            }
+        } else if (dir == 2) {
+            if ((x + 1 == getX(vec[i]) && y - 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y + 1 == getY(vec[i]))) {
+                ret.push_back(vec[i - 1]);
+                dir = 3;
+            } else if (x != getX(vec[i]) && y == getY(vec[i])) {
+                ret.push_back(vec[i - 1]);
+                dir = 1;
+            } else if (x == getX(vec[i]) && y != getY(vec[i])) {
+                ret.push_back(vec[i - 1]);
+                dir = 0;
+            }
+        } else if (dir == 3) {
+            if ((x + 1 == getX(vec[i]) && y + 1 == getY(vec[i])) || (x - 1 == getX(vec[i]) && y - 1 == getY(vec[i]))) {
+                ret.push_back(vec[i - 1]);
+                dir = 2;
+            } else if (x != getX(vec[i]) && y == getY(vec[i])) {
+                ret.push_back(vec[i - 1]);
+                dir = 1;
+            } else if (x == getX(vec[i]) && y != getY(vec[i])) {
                 ret.push_back(vec[i - 1]);
                 dir = 0;
             }
@@ -166,12 +242,21 @@ void init(const Stage& aStage) {
     }
     rep (i, H) {
         rep (j, W) {
-            rep (k, 4) {
+            rep (k, 8) {
                 int nx = j + dx[k];
                 int ny = i + dy[k];
                 if (!onBoard(nx, ny)) continue;
-                edge tmp = {ny * W + nx, v[i][j]};
-                graph[i * W + j].push_back(tmp);
+                edge c;
+                if (k <= 3) {
+                    edge tmp = {ny * W + nx, v[i][j]};
+                    c = tmp;
+                }
+                if (k >= 4) {
+                    int cost = v[i][j] * 1.4;
+                    edge tmp = {ny * W + nx, cost};
+                    c = tmp;
+                }
+                graph[i * W + j].push_back(c);
             }
         }
     }
