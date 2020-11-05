@@ -269,6 +269,72 @@ void init(const Stage& aStage) {
 //    printf("\n");
     
 }
+int count = 0;
+vector<vector<int> > dp((1LL << 21), vector<int>(21, INF)), tmpPos((1LL << 21), vector<int>(21, INF)), scrollDist(21, vector<int>(21, INF));
+vector<float> scrollPosX(21), scrollPosY(21);
+vector<int> list(21);
+vector<int> next;
+
+void bitDP(const Stage& aStage) {
+    next.clear();
+    rep (i,(1LL << 21)) rep (j, 21) dp[i][j] = INF;
+    rep (i, 21) rep (j, 21) {
+        if (i == j || j == 0) scrollDist[i][j] = 0;
+        else scrollDist[i][j] = INF;
+    }
+    int ti = 1;
+    for(auto scroll: aStage.scrolls()) {
+        scrollPosX[ti] = scroll.pos().x;
+        scrollPosY[ti] = scroll.pos().y;
+        int tmpx = scrollPosX[ti];
+        int tmpy = scrollPosY[ti];
+        list[ti] = tmpy * W + tmpx;
+        ti++;
+    }
+    count = ti; // count = 21;
+    int tmpx = aStage.rabbit().pos().x;
+    int tmpy = aStage.rabbit().pos().y;
+    list[0] = tmpy * W + tmpx;
+    rep (i, count) {
+        dijkstra(list[i]);
+//        printf("%d\n", list[i]);
+        rep (j, count) {
+            if (j == 0) scrollDist[i][j] = 0;
+//            printf("%d\n",list[j]);
+            else {
+                scrollDist[i][j] = dist[list[j]];
+            }
+        }
+    }
+//    printf("\n");
+    rep (i, 21) scrollDist[i][i] = 0;
+    dp[0][0] = 0;
+    rep (bit, (1LL << count)) {
+        if (bit == 0) continue;
+        rep (i, count) {
+            if (bit & (1LL << i)) {
+                rep (j, count) {
+                    if (dp[bit][i] > dp[bit - (1LL << i)][j] + scrollDist[j][i]) {
+                        dp[bit][i] = dp[bit - (1LL << i)][j] + scrollDist[j][i];
+                        tmpPos[bit][i] = j;
+                    }
+                }
+            }
+        }
+    }
+    int S = (1LL << count) - 1, cur = 0;
+    rep (i, count) {
+        next.push_back(tmpPos[S][cur]);
+        int to = tmpPos[S][cur];
+        S = (S - (1LL << cur));
+        cur = to;
+    }
+    reverse(next.begin(), next.end());
+//    rep(i, count) {
+//        printf("%d",next[i]);
+//    }
+//    printf("\n");
+}
 
 
 
@@ -411,6 +477,7 @@ Answer::~Answer()
 void Answer::initialize(const Stage& aStage)
 {
     init(aStage);
+    bitDP(aStage);
 }
 
 //------------------------------------------------------------------------------
@@ -421,17 +488,26 @@ void Answer::initialize(const Stage& aStage)
 Vector2 Answer::getTargetPos(const Stage& aStage)
 {
     auto pos = aStage.rabbit().pos();
-    for(auto scroll : aStage.scrolls()) {
-        // まだ手に入れていない巻物を探して、そこに向かって飛ぶ
-        if (!scroll.isGotten()) {
-            //printf("%f %f\n",scroll.pos().x, scroll.pos().y);
-            // Vector2 ret = solve(scroll.pos(), pos);
-            Vector2 ret = solve(scroll.pos(), pos);
-    //          printf("%f %f\n",ret.x,ret.y);
-            return ret;
-        }
+    rep (i, count) {
+        if (i == 0) continue;
+        if (aStage.scrolls()[next[i] - 1].isGotten()) continue;
+        Vector2 ret = solve(aStage.scrolls()[next[i] - 1].pos(), pos);
+        return ret;
     }
-    return pos;
+//    for(auto scroll : aStage.scrolls()) {
+//        // まだ手に入れていない巻物を探して、そこに向かって飛ぶ
+//        if (!scroll.isGotten()) {
+//            //printf("%f %f\n",scroll.pos().x, scroll.pos().y);
+//            // Vector2 ret = solve(scroll.pos(), pos);
+//            Vector2 ret = solve(scroll.pos(), pos);
+//    //          printf("%f %f\n",ret.x,ret.y);
+//            return ret;
+//        }
+//    }
+    Vector2 ret;
+    ret.x = 0;
+    ret.y = 0;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
