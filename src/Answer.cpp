@@ -39,7 +39,10 @@ int H = 50, W = 50;
 int n = H * W;
 vector<vector<int> > v(H, vector<int>(W, 0));
 vector<vector<int> > board(H, vector<int>(W, 0));
-vector<vector<int> > acc_sum(H + 1, vector<int>(W + 1, 0));
+vector<vector<int> > acc_sum_plain(H + 1, vector<int>(W + 1, 0));
+vector<vector<int> > acc_sum_bush(H + 1, vector<int>(W + 1, 0));
+vector<vector<int> > acc_sum_sand(H + 1, vector<int>(W + 1, 0));
+vector<vector<int> > acc_sum_pond(H + 1, vector<int>(W + 1, 0));
 
 vector<edge> graph[MAX_V];
 int dist[MAX_V];
@@ -78,7 +81,6 @@ int getY(int ret) {
 
 
 vector<int> get_dia_path(vector<int> vec, int start) {
-    rep (i, H) rep (j, W) acc_sum[i + 1][j + 1] = acc_sum[i][j + 1] + acc_sum[i + 1][j] - acc_sum[i][j] + board[i][j];
     vector<int> ret;
     int S = vec.size();
     if (S == 1) return vec;
@@ -94,8 +96,8 @@ vector<int> get_dia_path(vector<int> vec, int start) {
         toX = max(getX(start), getX(vec[i + 1]));
         toY = max(getY(start), getY(vec[i + 1]));
 //        printf("%d\n",acc_sum[toY + 1][toX + 1] + acc_sum[fromY][fromX] - acc_sum[toY + 1][fromX] - acc_sum[fromY][toX + 1]);
-        int tmpValue = (toY + 1 - fromY) * (toX + 1 - fromX) * 1.3;
-        if (acc_sum[toY + 1][toX + 1] + acc_sum[fromY][fromX] - acc_sum[toY + 1][fromX] - acc_sum[fromY][toX + 1] <= tmpValue) {
+        int tmpValue = (toY + 1 - fromY) * (toX + 1 - fromX) * 1.1;
+        if ((acc_sum_plain[toY + 1][toX + 1] + acc_sum_plain[fromY][fromX] - acc_sum_plain[toY + 1][fromX] - acc_sum_plain[fromY][toX + 1] <= tmpValue) || (acc_sum_bush[toY + 1][toX + 1] + acc_sum_bush[fromY][fromX] - acc_sum_bush[toY + 1][fromX] - acc_sum_bush[fromY][toX + 1] <= tmpValue) || (acc_sum_sand[toY + 1][toX + 1] + acc_sum_sand[fromY][fromX] - acc_sum_sand[toY + 1][fromX] - acc_sum_sand[fromY][toX + 1] <= tmpValue) || (acc_sum_pond[toY + 1][toX + 1] + acc_sum_pond[fromY][fromX] - acc_sum_pond[toY + 1][fromX] - acc_sum_pond[fromY][toX + 1] <= tmpValue)) {
             ret.push_back(vec[i + 1]);
             tmpFlag = true;
         } else {
@@ -267,7 +269,18 @@ bool onBoard(int x, int y) {
 
 void init(const Stage& aStage) {
 //    printf("\n");
-    rep (i, H + 1) rep (j, W + 1) acc_sum[i][j] = 0;
+    rep (i, H + 1) {
+        acc_sum_plain[i][0] = 0;
+        acc_sum_bush[i][0] = 0;
+        acc_sum_sand[i][0] = 0;
+        acc_sum_pond[i][0] = 0;
+    }
+    rep (j, W + 1) {
+        acc_sum_plain[0][j] = 0;
+        acc_sum_bush[0][j] = 0;
+        acc_sum_sand[0][j] = 0;
+        acc_sum_pond[0][j] = 0;
+    }
     rep (i, MAX_V) graph[i].clear();
     
     rep (i, H) {
@@ -277,11 +290,34 @@ void init(const Stage& aStage) {
             tmp.y = i;
             if (aStage.terrain(tmp) == Terrain(0)) v[i][j] = 100, board[i][j] = 1;
             else if (aStage.terrain(tmp) == Terrain(1)) v[i][j] = 166, board[i][j] = 2;
-            else if (aStage.terrain(tmp) == Terrain(2)) v[i][j] = 333, board[i][j] = 4;
-            else if (aStage.terrain(tmp) == Terrain(3)) v[i][j] = 1000, board[i][j] = 8;
+            else if (aStage.terrain(tmp) == Terrain(2)) v[i][j] = 333, board[i][j] = 3;
+            else if (aStage.terrain(tmp) == Terrain(3)) v[i][j] = 1000, board[i][j] = 4;
         }
     }
-    rep (i, H) rep (j, W) acc_sum[i + 1][j + 1] = acc_sum[i][j + 1] + acc_sum[i + 1][j] - acc_sum[i][j] + board[i][j];
+    rep (i, H) rep (j, W) {
+        if (board[i][j] == 1) {
+            acc_sum_plain[i + 1][j + 1] = acc_sum_plain[i][j + 1] + acc_sum_plain[i + 1][j] - acc_sum_plain[i][j] + 1;
+            acc_sum_bush[i + 1][j + 1] = acc_sum_bush[i][j + 1] + acc_sum_bush[i + 1][j] - acc_sum_bush[i][j] + 2;
+            acc_sum_sand[i + 1][j + 1] = acc_sum_sand[i][j + 1] + acc_sum_sand[i + 1][j] - acc_sum_sand[i][j] + 2;
+            acc_sum_pond[i + 1][j + 1] = acc_sum_pond[i][j + 1] + acc_sum_pond[i + 1][j] - acc_sum_pond[i][j] + 2;
+        } else if (board[i][j] == 2) {
+            acc_sum_plain[i + 1][j + 1] = acc_sum_plain[i][j + 1] + acc_sum_plain[i + 1][j] - acc_sum_plain[i][j] + 2;
+            acc_sum_bush[i + 1][j + 1] = acc_sum_bush[i][j + 1] + acc_sum_bush[i + 1][j] - acc_sum_bush[i][j] + 1;
+            acc_sum_sand[i + 1][j + 1] = acc_sum_sand[i][j + 1] + acc_sum_sand[i + 1][j] - acc_sum_sand[i][j] + 4;
+            acc_sum_pond[i + 1][j + 1] = acc_sum_pond[i][j + 1] + acc_sum_pond[i + 1][j] - acc_sum_pond[i][j] + 8;
+        } else if (board[i][j] == 3) {
+            acc_sum_plain[i + 1][j + 1] = acc_sum_plain[i][j + 1] + acc_sum_plain[i + 1][j] - acc_sum_plain[i][j] + 2;
+            acc_sum_bush[i + 1][j + 1] = acc_sum_bush[i][j + 1] + acc_sum_bush[i + 1][j] - acc_sum_bush[i][j] + 2;
+            acc_sum_sand[i + 1][j + 1] = acc_sum_sand[i][j + 1] + acc_sum_sand[i + 1][j] - acc_sum_sand[i][j] + 1;
+            acc_sum_pond[i + 1][j + 1] = acc_sum_pond[i][j + 1] + acc_sum_pond[i + 1][j] - acc_sum_pond[i][j] + 8;
+        } else if (board[i][j] == 4) {
+            acc_sum_plain[i + 1][j + 1] = acc_sum_plain[i][j + 1] + acc_sum_plain[i + 1][j] - acc_sum_plain[i][j] + 2;
+            acc_sum_bush[i + 1][j + 1] = acc_sum_bush[i][j + 1] + acc_sum_bush[i + 1][j] - acc_sum_bush[i][j] + 2;
+            acc_sum_sand[i + 1][j + 1] = acc_sum_sand[i][j + 1] + acc_sum_sand[i + 1][j] - acc_sum_sand[i][j] + 2;
+            acc_sum_pond[i + 1][j + 1] = acc_sum_pond[i][j + 1] + acc_sum_pond[i + 1][j] - acc_sum_pond[i][j] + 1;
+        }
+        
+    }
     rep (i, H) {
         rep (j, W) {
             rep (k, 8) {
@@ -397,9 +433,9 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
         //同じ巻物
         int warn = path.size();
 //        printf("%d %d\n",path[0]%W,path[0]/W);
-        if (id == warn - 1) {
-            return aScrollPos;
-        }
+//        if (id == warn - 1) {
+////            return aScrollPos;
+//        }
         if (sx == tx && sy == ty) {
             // 新しい中継地点を探す
             id++;
