@@ -38,6 +38,8 @@ namespace hpc {
 int H = 50, W = 50;
 int n = H * W;
 vector<vector<int> > v(H, vector<int>(W, 0));
+vector<vector<int> > board(H, vector<int>(W, 0));
+vector<vector<int> > acc_sum(H + 1, vector<int>(W + 1, 0));
 
 vector<edge> graph[MAX_V];
 int dist[MAX_V];
@@ -73,6 +75,39 @@ int getX(int ret) {
 int getY(int ret) {
     return ret / W;
 }
+
+
+vector<int> get_dia_path(vector<int> vec, int start) {
+    rep (i, H) rep (j, W) acc_sum[i + 1][j + 1] = acc_sum[i][j + 1] + acc_sum[i + 1][j] - acc_sum[i][j] + board[i][j];
+    vector<int> ret;
+    int S = vec.size();
+    if (S == 1) return vec;
+    int fromX, fromY, toX, toY;
+    bool tmpFlag = false;
+    rep (i, S - 1) {
+        if (tmpFlag) {
+            tmpFlag = false;
+            continue;
+        }
+        fromX = min(getX(start), getX(vec[i + 1]));
+        fromY = min(getY(start), getY(vec[i + 1]));
+        toX = max(getX(start), getX(vec[i + 1]));
+        toY = max(getY(start), getY(vec[i + 1]));
+//        printf("%d\n",acc_sum[toY + 1][toX + 1] + acc_sum[fromY][fromX] - acc_sum[toY + 1][fromX] - acc_sum[fromY][toX + 1]);
+        if (acc_sum[toY + 1][toX + 1] + acc_sum[fromY][fromX] - acc_sum[toY + 1][fromX] - acc_sum[fromY][toX + 1] == (toY + 1 - fromY) * (toX + 1 - fromX)) {
+            ret.push_back(vec[i + 1]);
+            tmpFlag = true;
+        } else {
+            ret.push_back(vec[i]);
+            start = vec[i];
+        }
+        
+    }
+//    printf("\n");
+    if (!tmpFlag) ret.push_back(vec[S - 1]);
+    return ret;
+}
+
 
 vector<int> get_new_path(vector<int> vec) {
     vector<int> ret;
@@ -207,14 +242,18 @@ vector<int> get_new_path(vector<int> vec) {
 }
 
 
+
+
 vector<int> get_path(int t) {
     vector<int> path;
     for (int cur = t; cur != -1; cur = pre[cur]) {
         path.push_back(cur);
     }
     reverse(ALL(path));
+    int start = path[0];
     vector<int> ret = get_new_path(path);
-    return ret;
+    vector<int> newret = get_dia_path(ret, start);
+    return newret;
 }
 
 
@@ -227,6 +266,7 @@ bool onBoard(int x, int y) {
 
 void init(const Stage& aStage) {
 //    printf("\n");
+    rep (i, H + 1) rep (j, W + 1) acc_sum[i][j] = 0;
     rep (i, MAX_V) graph[i].clear();
     
     rep (i, H) {
@@ -234,12 +274,13 @@ void init(const Stage& aStage) {
             Vector2 tmp;
             tmp.x = j;
             tmp.y = i;
-            if (aStage.terrain(tmp) == Terrain(0)) v[i][j] = 100;
-            else if (aStage.terrain(tmp) == Terrain(1)) v[i][j] = 166;
-            else if (aStage.terrain(tmp) == Terrain(2)) v[i][j] = 333;
-            else if (aStage.terrain(tmp) == Terrain(3)) v[i][j] = 1000;
+            if (aStage.terrain(tmp) == Terrain(0)) v[i][j] = 100, board[i][j] = 1;
+            else if (aStage.terrain(tmp) == Terrain(1)) v[i][j] = 166, board[i][j] = 2;
+            else if (aStage.terrain(tmp) == Terrain(2)) v[i][j] = 333, board[i][j] = 4;
+            else if (aStage.terrain(tmp) == Terrain(3)) v[i][j] = 1000, board[i][j] = 8;
         }
     }
+    rep (i, H) rep (j, W) acc_sum[i + 1][j + 1] = acc_sum[i][j + 1] + acc_sum[i + 1][j] - acc_sum[i][j] + board[i][j];
     rep (i, H) {
         rep (j, W) {
             rep (k, 8) {
@@ -487,6 +528,7 @@ void Answer::initialize(const Stage& aStage)
 /// @return 移動の目標座標
 Vector2 Answer::getTargetPos(const Stage& aStage)
 {
+    
     auto pos = aStage.rabbit().pos();
     rep (i, count) {
         if (i == 0) continue;
@@ -494,6 +536,7 @@ Vector2 Answer::getTargetPos(const Stage& aStage)
         Vector2 ret = solve(aStage.scrolls()[next[i] - 1].pos(), pos);
         return ret;
     }
+    
 //    for(auto scroll : aStage.scrolls()) {
 //        // まだ手に入れていない巻物を探して、そこに向かって飛ぶ
 //        if (!scroll.isGotten()) {
