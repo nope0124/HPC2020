@@ -94,7 +94,8 @@ vector<int> get_dia_path(vector<int> vec, int start) {
         toX = max(getX(start), getX(vec[i + 1]));
         toY = max(getY(start), getY(vec[i + 1]));
 //        printf("%d\n",acc_sum[toY + 1][toX + 1] + acc_sum[fromY][fromX] - acc_sum[toY + 1][fromX] - acc_sum[fromY][toX + 1]);
-        if (acc_sum[toY + 1][toX + 1] + acc_sum[fromY][fromX] - acc_sum[toY + 1][fromX] - acc_sum[fromY][toX + 1] == (toY + 1 - fromY) * (toX + 1 - fromX)) {
+        int tmpValue = (toY + 1 - fromY) * (toX + 1 - fromX) * 1.3;
+        if (acc_sum[toY + 1][toX + 1] + acc_sum[fromY][fromX] - acc_sum[toY + 1][fromX] - acc_sum[fromY][toX + 1] <= tmpValue) {
             ret.push_back(vec[i + 1]);
             tmpFlag = true;
         } else {
