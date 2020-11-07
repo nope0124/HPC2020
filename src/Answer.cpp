@@ -80,6 +80,18 @@ int getY(int ret) {
 }
 
 
+
+vector<int> get_pond_path(vector<int> vec, int start) {
+    vector<int> ret;
+    int S = vec.size();
+    rep (i, S) {
+        if (i == S - 1) ret.push_back(vec[S - 1]);
+        if (board[getY(vec[i])][getX(vec[i])] != 1) ret.push_back(vec[i]);
+    }
+    return ret;
+}
+
+
 vector<int> get_dia_path(vector<int> vec, int start) {
     vector<int> ret;
     int S = vec.size();
@@ -173,6 +185,7 @@ vector<int> get_new_path(vector<int> vec) {
             y = getY(vec[i]);
             continue;
         }
+        
         if (i == 1) {
             if (getX(vec[i]) == x && getY(vec[i]) != y) {
                 dir = 0;
@@ -256,7 +269,8 @@ vector<int> get_path(int t) {
     int start = path[0];
     vector<int> ret = get_new_path(path);
     vector<int> newret = get_dia_path(ret, start);
-    return newret;
+    vector<int> newnewret = get_pond_path(newret, start);
+    return newnewret;
 }
 
 
@@ -288,19 +302,19 @@ void init(const Stage& aStage) {
             Vector2 tmp;
             tmp.x = j;
             tmp.y = i;
-            if (aStage.terrain(tmp) == Terrain(0)) v[i][j] = 100, board[i][j] = 1;
-            else if (aStage.terrain(tmp) == Terrain(1)) v[i][j] = 166, board[i][j] = 2;
+            if (aStage.terrain(tmp) == Terrain(0)) v[i][j] = 100, board[i][j] = 10;
+            else if (aStage.terrain(tmp) == Terrain(1)) v[i][j] = 166, board[i][j] = 6;
             else if (aStage.terrain(tmp) == Terrain(2)) v[i][j] = 333, board[i][j] = 3;
-            else if (aStage.terrain(tmp) == Terrain(3)) v[i][j] = 1000, board[i][j] = 4;
+            else if (aStage.terrain(tmp) == Terrain(3)) v[i][j] = 1000, board[i][j] = 1;
         }
     }
     rep (i, H) rep (j, W) {
-        if (board[i][j] == 1) {
+        if (board[i][j] == 10) {
             acc_sum_plain[i + 1][j + 1] = acc_sum_plain[i][j + 1] + acc_sum_plain[i + 1][j] - acc_sum_plain[i][j] + 1;
             acc_sum_bush[i + 1][j + 1] = acc_sum_bush[i][j + 1] + acc_sum_bush[i + 1][j] - acc_sum_bush[i][j] + 2;
             acc_sum_sand[i + 1][j + 1] = acc_sum_sand[i][j + 1] + acc_sum_sand[i + 1][j] - acc_sum_sand[i][j] + 2;
             acc_sum_pond[i + 1][j + 1] = acc_sum_pond[i][j + 1] + acc_sum_pond[i + 1][j] - acc_sum_pond[i][j] + 2;
-        } else if (board[i][j] == 2) {
+        } else if (board[i][j] == 6) {
             acc_sum_plain[i + 1][j + 1] = acc_sum_plain[i][j + 1] + acc_sum_plain[i + 1][j] - acc_sum_plain[i][j] + 2;
             acc_sum_bush[i + 1][j + 1] = acc_sum_bush[i][j + 1] + acc_sum_bush[i + 1][j] - acc_sum_bush[i][j] + 1;
             acc_sum_sand[i + 1][j + 1] = acc_sum_sand[i][j + 1] + acc_sum_sand[i + 1][j] - acc_sum_sand[i][j] + 4;
@@ -310,7 +324,7 @@ void init(const Stage& aStage) {
             acc_sum_bush[i + 1][j + 1] = acc_sum_bush[i][j + 1] + acc_sum_bush[i + 1][j] - acc_sum_bush[i][j] + 2;
             acc_sum_sand[i + 1][j + 1] = acc_sum_sand[i][j + 1] + acc_sum_sand[i + 1][j] - acc_sum_sand[i][j] + 1;
             acc_sum_pond[i + 1][j + 1] = acc_sum_pond[i][j + 1] + acc_sum_pond[i + 1][j] - acc_sum_pond[i][j] + 8;
-        } else if (board[i][j] == 4) {
+        } else if (board[i][j] == 1) {
             acc_sum_plain[i + 1][j + 1] = acc_sum_plain[i][j + 1] + acc_sum_plain[i + 1][j] - acc_sum_plain[i][j] + 2;
             acc_sum_bush[i + 1][j + 1] = acc_sum_bush[i][j + 1] + acc_sum_bush[i + 1][j] - acc_sum_bush[i][j] + 2;
             acc_sum_sand[i + 1][j + 1] = acc_sum_sand[i][j + 1] + acc_sum_sand[i + 1][j] - acc_sum_sand[i][j] + 2;
@@ -422,15 +436,29 @@ vector<int> path;
 vector<int> newPath;
 int flag = 100;
 int id = 0;
+int scrollCount = 0;
 
 
+bool binarySearch(float nx, float ny) {
+    int Ix = nx;
+    int Iy = ny;
+    if (board[Iy][Ix] == 1) return false;
+    else return true;
+}
+
+bool binaryFlag = false;
 
 Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
     int sx = aRabbitPos.x;
     int sy = aRabbitPos.y;
-//    printf("%d %d %d %d\n",sx,sy,tx,ty);
+    
+    float distance = sqrt((aRabbitPos.x - tx) * (aRabbitPos.x - tx) + (aRabbitPos.y - ty) * (aRabbitPos.y - ty));
+    float can = 1;
+    rep (i, scrollCount) can *= 1.1;
+    can *= board[sy][sx] / 10;
     if ((int)aScrollPos.x == gx && (int)aScrollPos.y == gy) {
         //同じ巻物
+        
         int warn = path.size();
 //        printf("%d %d\n",path[0]%W,path[0]/W);
 //        if (id == warn - 1) {
@@ -439,6 +467,7 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
         if (sx == tx && sy == ty) {
             // 新しい中継地点を探す
             id++;
+            binaryFlag = false;
 //            printf("OK\n");
             tx = path[id] % W;
             ty = path[id] / W;
@@ -447,24 +476,53 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
             ret.y = path[id] / W + 0.5;
             return ret;
         } else {
-//            if (flag<=0) {
-//            Vector2 ret;
-//                       ret.x = 0;
-//                       ret.y = 0;
-//                       return ret;
-//            }
-            //中継地点の更新なし
-////            if (flag >= 1) {
-//                flag --;
+            float dirX = (can * (tx + 0.5) + (distance - can) * aRabbitPos.x) / distance;
+            float dirY = (can * (ty + 0.5) + (distance - can) * aRabbitPos.y) / distance;
+            int IdirX = dirX;
+            int IdirY = dirY;
+            if (binaryFlag) {
+                binaryFlag = false;
+            } else if (distance <= can) {
+                Vector2 ret;
+                ret.x = tx + 0.5;
+                ret.y = ty + 0.5;
+                return ret;
+            } else if (board[sy][sx] != 1 && board[IdirY][IdirX] == 1) {
+                float okx = aRabbitPos.x;
+                float oky = aRabbitPos.y;
+                float ngx = dirX;
+                float ngy = dirY;
+                printf("%f %f\n",okx,oky);
+                printf("%f %f\n",ngx,ngy);
+                rep (i, 10) {
+                    float midx = (okx + ngx) / 2;
+                    float midy = (oky + ngy) / 2;
+                    if (binarySearch(midx, midy)) {
+                        okx = midx;
+                        oky = midy;
+                    } else {
+                        ngx = midx;
+                        ngy = midy;
+                    }
+                   
+                }
+                printf("%f %f\n",okx,oky);
+                
+                binaryFlag = true;
+                Vector2 ret;
+                ret.x = okx;
+                ret.y = oky;
+                return ret;
+            }
             Vector2 ret;
             ret.x = path[id] % W + 0.5;
             ret.y = path[id] / W + 0.5;
 //                printf("%d\n",1);
 //                printf("%f %f\n",ret.x,ret.y);
             return ret;
-//            }
         }
     } else {
+        binaryFlag = false;
 //        printf("%f %f\n",aRabbitPos.x,aRabbitPos.y);
         // 新しい巻物
 //        flag = 100;
@@ -554,6 +612,7 @@ Answer::~Answer()
 /// @param aStage 現在のステージ
 void Answer::initialize(const Stage& aStage)
 {
+    printf(".......\n");
     init(aStage);
     bitDP(aStage);
 }
@@ -570,6 +629,7 @@ Vector2 Answer::getTargetPos(const Stage& aStage)
     rep (i, count) {
         if (i == 0) continue;
         if (aStage.scrolls()[next[i] - 1].isGotten()) continue;
+        scrollCount = i;
         Vector2 ret = solve(aStage.scrolls()[next[i] - 1].pos(), pos);
         return ret;
     }
