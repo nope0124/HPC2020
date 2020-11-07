@@ -452,10 +452,12 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
     int sx = aRabbitPos.x;
     int sy = aRabbitPos.y;
     
-    float distance = sqrt((aRabbitPos.x - tx) * (aRabbitPos.x - tx) + (aRabbitPos.y - ty) * (aRabbitPos.y - ty));
+    
     float can = 1;
     rep (i, scrollCount) can *= 1.1;
-    can *= board[sy][sx] / 10;
+    can *= (float)board[sy][sx] / 10;
+//    printf("%f\n",can);
+    
     if ((int)aScrollPos.x == gx && (int)aScrollPos.y == gy) {
         //同じ巻物
         
@@ -467,23 +469,22 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
         if (sx == tx && sy == ty) {
             // 新しい中継地点を探す
             id++;
-            binaryFlag = false;
 //            printf("OK\n");
             tx = path[id] % W;
             ty = path[id] / W;
-            Vector2 ret;
-            ret.x = path[id] % W + 0.5;
-            ret.y = path[id] / W + 0.5;
-            return ret;
-        } else {
+            
+            float distance = sqrt((aRabbitPos.x - (tx + 0.5)) * (aRabbitPos.x - (tx + 0.5)) + (aRabbitPos.y - (ty + 0.5)) * (aRabbitPos.y - (ty + 0.5)));
             float dirX = (can * (tx + 0.5) + (distance - can) * aRabbitPos.x) / distance;
             float dirY = (can * (ty + 0.5) + (distance - can) * aRabbitPos.y) / distance;
             int IdirX = dirX;
             int IdirY = dirY;
+            
+            
             if (binaryFlag) {
                 binaryFlag = false;
             } else if (distance <= can) {
                 Vector2 ret;
+            //                printf("%d\n",2);
                 ret.x = tx + 0.5;
                 ret.y = ty + 0.5;
                 return ret;
@@ -492,8 +493,59 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
                 float oky = aRabbitPos.y;
                 float ngx = dirX;
                 float ngy = dirY;
-                printf("%f %f\n",okx,oky);
-                printf("%f %f\n",ngx,ngy);
+            //                printf("%f %f\n",okx,oky);
+            //                printf("%f %f\n",ngx,ngy);
+                rep (i, 10) {
+                    float midx = (okx + ngx) / 2;
+                    float midy = (oky + ngy) / 2;
+                    if (binarySearch(midx, midy)) {
+                        okx = midx;
+                        oky = midy;
+                    } else {
+                        ngx = midx;
+                        ngy = midy;
+                    }
+                    
+                }
+            //                printf("%d\n",3);
+            //                printf("%f %f\n",okx,oky);
+                        
+                binaryFlag = true;
+                Vector2 ret;
+                ret.x = okx;
+                ret.y = oky;
+                return ret;
+            }
+            
+            
+            
+            Vector2 ret;
+            ret.x = path[id] % W + 0.5;
+            ret.y = path[id] / W + 0.5;
+//            printf("%d\n",1);
+            return ret;
+        } else {
+            float distance = sqrt((aRabbitPos.x - (tx + 0.5)) * (aRabbitPos.x - (tx + 0.5)) + (aRabbitPos.y - (ty + 0.5)) * (aRabbitPos.y - (ty + 0.5)));
+            float dirX = (can * (tx + 0.5) + (distance - can) * aRabbitPos.x) / distance;
+            float dirY = (can * (ty + 0.5) + (distance - can) * aRabbitPos.y) / distance;
+            int IdirX = dirX;
+            int IdirY = dirY;
+            
+            if (binaryFlag) {
+                binaryFlag = false;
+            } else if (distance <= can) {
+                Vector2 ret;
+//                printf("%d\n",2);
+                ret.x = tx + 0.5;
+                ret.y = ty + 0.5;
+                return ret;
+            } else if (board[sy][sx] != 1 && board[IdirY][IdirX] == 1) {
+                float okx = aRabbitPos.x;
+                float oky = aRabbitPos.y;
+                float ngx = dirX;
+                float ngy = dirY;
+//                printf("%f %f\n",okx,oky);
+//                printf("%f %f\n",ngx,ngy);
                 rep (i, 10) {
                     float midx = (okx + ngx) / 2;
                     float midy = (oky + ngy) / 2;
@@ -506,7 +558,8 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
                     }
                    
                 }
-                printf("%f %f\n",okx,oky);
+//                printf("%d\n",3);
+//                printf("%f %f\n",okx,oky);
                 
                 binaryFlag = true;
                 Vector2 ret;
@@ -514,6 +567,7 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
                 ret.y = oky;
                 return ret;
             }
+//            printf("%d\n",4);
             Vector2 ret;
             ret.x = path[id] % W + 0.5;
             ret.y = path[id] / W + 0.5;
@@ -522,7 +576,7 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
             return ret;
         }
     } else {
-        binaryFlag = false;
+        
 //        printf("%f %f\n",aRabbitPos.x,aRabbitPos.y);
         // 新しい巻物
 //        flag = 100;
@@ -543,6 +597,58 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
         ty = path[id] / W;
         gx = aScrollPos.x;
         gy = aScrollPos.y;
+        
+        
+        
+        
+        float distance = sqrt((aRabbitPos.x - (tx + 0.5)) * (aRabbitPos.x - (tx + 0.5)) + (aRabbitPos.y - (ty + 0.5)) * (aRabbitPos.y - (ty + 0.5)));
+        float dirX = (can * (tx + 0.5) + (distance - can) * aRabbitPos.x) / distance;
+        float dirY = (can * (ty + 0.5) + (distance - can) * aRabbitPos.y) / distance;
+        int IdirX = dirX;
+        int IdirY = dirY;
+        
+        
+        if (binaryFlag) {
+            binaryFlag = false;
+        } else if (distance <= can) {
+            Vector2 ret;
+        //                printf("%d\n",2);
+            ret.x = tx + 0.5;
+            ret.y = ty + 0.5;
+            return ret;
+        } else if (board[sy][sx] != 1 && board[IdirY][IdirX] == 1) {
+            float okx = aRabbitPos.x;
+            float oky = aRabbitPos.y;
+            float ngx = dirX;
+            float ngy = dirY;
+        //                printf("%f %f\n",okx,oky);
+        //                printf("%f %f\n",ngx,ngy);
+            rep (i, 10) {
+                float midx = (okx + ngx) / 2;
+                float midy = (oky + ngy) / 2;
+                if (binarySearch(midx, midy)) {
+                    okx = midx;
+                    oky = midy;
+                } else {
+                    ngx = midx;
+                    ngy = midy;
+                }
+                
+            }
+        //                printf("%d\n",3);
+        //                printf("%f %f\n",okx,oky);
+                    
+            binaryFlag = true;
+            Vector2 ret;
+            ret.x = okx;
+            ret.y = oky;
+            return ret;
+        }
+        
+        
+        
+        
+        
         Vector2 ret;
         ret.x = path[id] % W + 0.5;
         ret.y = path[id] / W + 0.5;
@@ -610,9 +716,9 @@ Answer::~Answer()
 /// 各ステージ開始時に呼び出される処理
 /// @detail 各ステージに対する初期化処理が必要ならここに書きます
 /// @param aStage 現在のステージ
-void Answer::initialize(const Stage& aStage)
+void Answer::initialize(const Stage& aStage)///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 {
-    printf(".......\n");
+//    printf(".......\n");
     init(aStage);
     bitDP(aStage);
 }
@@ -631,6 +737,9 @@ Vector2 Answer::getTargetPos(const Stage& aStage)
         if (aStage.scrolls()[next[i] - 1].isGotten()) continue;
         scrollCount = i;
         Vector2 ret = solve(aStage.scrolls()[next[i] - 1].pos(), pos);
+        int x = ret.x;
+        int y = ret.y;
+//        if (board[y][x] == 1) printf("%f %f\n",ret.x,ret.y);
         return ret;
     }
     
