@@ -608,7 +608,7 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
         int IdirY = dirY;
         
         
-        if (binaryFlag) {
+        if (binaryFlag) {//
             binaryFlag = false;
         } else if (distance <= can) {
             Vector2 ret;
