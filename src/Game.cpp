@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// @file
 /// @author   ハル研究所プログラミングコンテスト実行委員会
 ///
@@ -42,6 +42,7 @@ void Game::run(Answer* aAnswer)
     // ここの randomSeed および randomSpin は
     // サーバーの評価環境と配布パッケージとで異なります
     const uint randomSeedX = 0x81eacc80;
+//    const uint randomSeedX = 0x00000000;
     const uint randomSeedY = 0xcb9412ed;
     const uint randomSeedZ = 0x1acb27dc;
     const uint randomSeedW = 0x21a234f3;

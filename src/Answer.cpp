@@ -439,10 +439,10 @@ int id = 0;
 int scrollCount = 0;
 
 
-bool binarySearch(float nx, float ny) {
+bool binarySearch(float nx, float ny, int n) {
     int Ix = nx;
     int Iy = ny;
-    if (board[Iy][Ix] == 1) return false;
+    if (board[Iy][Ix] == n) return false;
     else return true;
 }
 
@@ -492,29 +492,32 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
                 }
             }
             
-            float distance = sqrt((aRabbitPos.x - (ret.x)) * (aRabbitPos.x - (ret.x)) + (aRabbitPos.y - (ret.y)) * (aRabbitPos.y - (ret.y)));
-            float dirX = (can * (ret.x) + (distance - can) * aRabbitPos.x) / distance;
-            float dirY = (can * (ret.y) + (distance - can) * aRabbitPos.y) / distance;
+            float distanceGoal = sqrt((aRabbitPos.x - (ret.x)) * (aRabbitPos.x - (ret.x)) + (aRabbitPos.y - (ret.y)) * (aRabbitPos.y - (ret.y)));
+            float dirX = (can * (ret.x) + (distanceGoal - can) * aRabbitPos.x) / distanceGoal;
+            float dirY = (can * (ret.y) + (distanceGoal - can) * aRabbitPos.y) / distanceGoal;
             int IdirX = dirX;
             int IdirY = dirY;
             
             
             
-            if (binaryFlag) {
+            
+            if (distanceGoal <= can) {
                 binaryFlag = false;
-            } else if (distance <= can) {
                 return ret;
+            } else if (binaryFlag) {
+                binaryFlag = false;
             } else if (board[sy][sx] != 1 && board[IdirY][IdirX] == 1) {
                 float okx = aRabbitPos.x;
                 float oky = aRabbitPos.y;
                 float ngx = dirX;
                 float ngy = dirY;
+//                printf("%d %f %f %f %f\n", board[sy][sx], aRabbitPos.x, aRabbitPos.y, dirX, dirY);
             //                printf("%f %f\n",okx,oky);
             //                printf("%f %f\n",ngx,ngy);
                 rep (i, 10) {
                     float midx = (okx + ngx) / 2;
                     float midy = (oky + ngy) / 2;
-                    if (binarySearch(midx, midy)) {
+                    if (binarySearch(midx, midy, board[IdirY][IdirX])) {
                         okx = midx;
                         oky = midy;
                     } else {
@@ -528,227 +531,233 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
                 ret.x = okx;
                 ret.y = oky;
                 return ret;
+            } else if (board[sy][sx] == 10 && board[IdirY][IdirX] == 3) {
+                float okx = aRabbitPos.x;
+                float oky = aRabbitPos.y;
+                float ngx = dirX;
+                float ngy = dirY;
+//               printf("%d %f %f %f %f\n", board[sy][sx], aRabbitPos.x, aRabbitPos.y, dirX, dirY);
+            //                printf("%f %f\n",okx,oky);
+            //                printf("%f %f\n",ngx,ngy);
+                rep (i, 10) {
+                    float midx = (okx + ngx) / 2;
+                    float midy = (oky + ngy) / 2;
+                    if (binarySearch(midx, midy, board[IdirY][IdirX])) {
+                        okx = midx;
+                        oky = midy;
+                    } else {
+                        ngx = midx;
+                        ngy = midy;
+                    }
+                }
+                binaryFlag = true;
+                Vector2 ret;
+                ret.x = okx;
+                ret.y = oky;
+                return ret;
             }
-            
+//            else if (board[sy][sx] == 10 && board[IdirY][IdirX] == 6) {
+//                float okx = aRabbitPos.x;
+//                float oky = aRabbitPos.y;
+//                float ngx = dirX;
+//                float ngy = dirY;
+////               printf("%d %f %f %f %f\n", board[sy][sx], aRabbitPos.x, aRabbitPos.y, dirX, dirY);
+//            //                printf("%f %f\n",okx,oky);
+//            //                printf("%f %f\n",ngx,ngy);
+//                rep (i, 10) {
+//                    float midx = (okx + ngx) / 2;
+//                    float midy = (oky + ngy) / 2;
+//                    if (binarySearch(midx, midy, board[IdirY][IdirX])) {
+//                        okx = midx;
+//                        oky = midy;
+//                    } else {
+//                        ngx = midx;
+//                        ngy = midy;
+//                    }
+//                }
+//                binaryFlag = true;
+//                Vector2 ret;
+//                ret.x = okx;
+//                ret.y = oky;
+//                return ret;
+//            }
+            binaryFlag = false;
             return ret;
         }
         
         
         
-        if (sx == tx && sy == ty) {
+        if (sx == tx && sy == ty) id++;
             // 新しい中継地点を探す
-            id++;
+            
             
             
             
             
             
             //たどり着けるなら頑張る
-            Vector2 retGoal;
-            if (aRabbitPos.y >= gy + 1) {
-                retGoal.y = gy + 0.99;
-                if (aRabbitPos.x >= gx + 1) {
-                    retGoal.x = gx + 0.99;
-                } else if (aRabbitPos.x <= gx) {
-                    retGoal.x = gx + 0.01;
-                } else {
-                    retGoal.x = gx + 0.5;
-                }
-            } else if (aRabbitPos.y <= gy) {
-                retGoal.y = gy + 0.01;
-                if (aRabbitPos.x >= tx + 1) {
-                    retGoal.x = gx + 0.99;
-                } else if (aRabbitPos.x <= gx) {
-                    retGoal.x = gx + 0.01;
-                } else {
-                    retGoal.x = gx + 0.5;
-                }
+        Vector2 retGoal;
+        if (aRabbitPos.y >= gy + 1) {
+            retGoal.y = gy + 0.99;
+            if (aRabbitPos.x >= gx + 1) {
+                retGoal.x = gx + 0.99;
+            } else if (aRabbitPos.x <= gx) {
+                retGoal.x = gx + 0.01;
             } else {
-                retGoal.y = gy + 0.5;
-                if (aRabbitPos.x >= gx + 1) {
-                    retGoal.x = gx + 0.99;
-                } else if (aRabbitPos.x <= gx) {
-                    retGoal.x = gx + 0.01;
-                } else {
-                    retGoal.x = gx + 0.5;
-                }
+                retGoal.x = gx + 0.5;
             }
+        } else if (aRabbitPos.y <= gy) {
+            retGoal.y = gy + 0.01;
+            if (aRabbitPos.x >= tx + 1) {
+                retGoal.x = gx + 0.99;
+            } else if (aRabbitPos.x <= gx) {
+                retGoal.x = gx + 0.01;
+            } else {
+                retGoal.x = gx + 0.5;
+            }
+        } else {
+            retGoal.y = gy + 0.5;
+            if (aRabbitPos.x >= gx + 1) {
+                retGoal.x = gx + 0.99;
+            } else if (aRabbitPos.x <= gx) {
+                retGoal.x = gx + 0.01;
+            } else {
+                retGoal.x = gx + 0.5;
+            }
+        }
             
-            float distanceGoal = sqrt((aRabbitPos.x - (retGoal.x)) * (aRabbitPos.x - (retGoal.x)) + (aRabbitPos.y - (retGoal.y)) * (aRabbitPos.y - (retGoal.y)));
-            if (distanceGoal <= can) return retGoal;
+        float distanceGoal = sqrt((aRabbitPos.x - (retGoal.x)) * (aRabbitPos.x - (retGoal.x)) + (aRabbitPos.y - (retGoal.y)) * (aRabbitPos.y - (retGoal.y)));
+        if (distanceGoal <= can) {
+            binaryFlag = false;
+            return retGoal;
+        }
             
 
-            ///////////
-            // if (id + 1 < warn) {
-            //     int fromX = min(sx, getX(path[id + 1]));
-            //     int fromY = min(sy, getY(path[id + 1]));
-            //     int toX = max(sx, getX(path[id + 1]));
-            //     int toY = max(sy, getY(path[id + 1]));
-            //     int tmpValue = (toY + 1 - fromY) * (toX + 1 - fromX) * 1.1;
-            //     if ((acc_sum_plain[toY + 1][toX + 1] + acc_sum_plain[fromY][fromX] - acc_sum_plain[toY + 1][fromX] - acc_sum_plain[fromY][toX + 1] <= tmpValue) || (acc_sum_bush[toY + 1][toX + 1] + acc_sum_bush[fromY][fromX] - acc_sum_bush[toY + 1][fromX] - acc_sum_bush[fromY][toX + 1] <= tmpValue) || (acc_sum_sand[toY + 1][toX + 1] + acc_sum_sand[fromY][fromX] - acc_sum_sand[toY + 1][fromX] - acc_sum_sand[fromY][toX + 1] <= tmpValue) || (acc_sum_pond[toY + 1][toX + 1] + acc_sum_pond[fromY][fromX] - acc_sum_pond[toY + 1][fromX] - acc_sum_pond[fromY][toX + 1] <= tmpValue)) {
-            //         id++;
-            //     }
-            // }
+            /////////
+        if (id + 1 < warn) {
+            int fromX = min(sx, getX(path[id + 1]));
+            int fromY = min(sy, getY(path[id + 1]));
+            int toX = max(sx, getX(path[id + 1]));
+            int toY = max(sy, getY(path[id + 1]));
+            int tmpValue = (toY + 1 - fromY) * (toX + 1 - fromX) * 1.1;
+            if ((acc_sum_plain[toY + 1][toX + 1] + acc_sum_plain[fromY][fromX] - acc_sum_plain[toY + 1][fromX] - acc_sum_plain[fromY][toX + 1] <= tmpValue) || (acc_sum_bush[toY + 1][toX + 1] + acc_sum_bush[fromY][fromX] - acc_sum_bush[toY + 1][fromX] - acc_sum_bush[fromY][toX + 1] <= tmpValue) || (acc_sum_sand[toY + 1][toX + 1] + acc_sum_sand[fromY][fromX] - acc_sum_sand[toY + 1][fromX] - acc_sum_sand[fromY][toX + 1] <= tmpValue) || (acc_sum_pond[toY + 1][toX + 1] + acc_sum_pond[fromY][fromX] - acc_sum_pond[toY + 1][fromX] - acc_sum_pond[fromY][toX + 1] <= tmpValue)) {
+                id++;
+            }
+        }
 
-            tx = path[id] % W;
-            ty = path[id] / W;
-            float distance = sqrt((aRabbitPos.x - (tx + 0.5)) * (aRabbitPos.x - (tx + 0.5)) + (aRabbitPos.y - (ty + 0.5)) * (aRabbitPos.y - (ty + 0.5)));
-            float dirX = (can * (tx + 0.5) + (distance - can) * aRabbitPos.x) / distance;
-            float dirY = (can * (ty + 0.5) + (distance - can) * aRabbitPos.y) / distance;
-            int IdirX = dirX;
-            int IdirY = dirY;
+        tx = path[id] % W;
+        ty = path[id] / W;
+        float distance = sqrt((aRabbitPos.x - (tx + 0.5)) * (aRabbitPos.x - (tx + 0.5)) + (aRabbitPos.y - (ty + 0.5)) * (aRabbitPos.y - (ty + 0.5)));
+        float dirX = (can * (tx + 0.5) + (distance - can) * aRabbitPos.x) / distance;
+        float dirY = (can * (ty + 0.5) + (distance - can) * aRabbitPos.y) / distance;
+        int IdirX = dirX;
+        int IdirY = dirY;
+        
+        
+        if (distance <= can) {
             
-            
-            if (binaryFlag) { //二分探索で頑張る
-                binaryFlag = false;
-            } else if (distance <= can) {
-                Vector2 ret;
+            Vector2 ret;
             //                printf("%d\n",2);
-                ret.x = tx + 0.5;
-                ret.y = ty + 0.5;
-                return ret;
-            } else if (board[sy][sx] != 1 && board[IdirY][IdirX] == 1) {
-                float okx = aRabbitPos.x;
-                float oky = aRabbitPos.y;
-                float ngx = dirX;
-                float ngy = dirY;
+            ret.x = tx + 0.5;
+            ret.y = ty + 0.5;
+            binaryFlag = false;
+            return ret;
+        } else if (binaryFlag) {
+            binaryFlag = false;
+        } else if (board[sy][sx] != 1 && board[IdirY][IdirX] == 1) {
+            float okx = aRabbitPos.x;
+            float oky = aRabbitPos.y;
+            float ngx = dirX;
+            float ngy = dirY;
+//            printf("%d %f %f %f %f\n", board[sy][sx], aRabbitPos.x, aRabbitPos.y, dirX, dirY);
             //                printf("%f %f\n",okx,oky);
             //                printf("%f %f\n",ngx,ngy);
-                rep (i, 10) {
-                    float midx = (okx + ngx) / 2;
-                    float midy = (oky + ngy) / 2;
-                    if (binarySearch(midx, midy)) {
-                        okx = midx;
-                        oky = midy;
-                    } else {
-                        ngx = midx;
-                        ngy = midy;
-                    }
+            rep (i, 10) {
+                float midx = (okx + ngx) / 2;
+                float midy = (oky + ngy) / 2;
+                if (binarySearch(midx, midy, board[dirY][dirX])) {
+                    okx = midx;
+                    oky = midy;
+                } else {
+                    ngx = midx;
+                    ngy = midy;
                 }
-                        
-                binaryFlag = true;
-                Vector2 ret;
-                ret.x = okx;
-                ret.y = oky;
-                return ret;
             }
-
-
-            
             
             
             Vector2 ret;
-            ret.x = path[id] % W + 0.5;
-            ret.y = path[id] / W + 0.5;
-//            printf("%d\n",1);
+            ret.x = okx;
+            ret.y = oky;
+            binaryFlag = true;
             return ret;
-        } else {
-
-
-
-
-
-
-            Vector2 retGoal;
-            if (aRabbitPos.y >= gy + 1) {
-                retGoal.y = gy + 0.99;
-                if (aRabbitPos.x >= gx + 1) {
-                    retGoal.x = gx + 0.99;
-                } else if (aRabbitPos.x <= gx) {
-                    retGoal.x = gx + 0.01;
+        } else if (board[sy][sx] == 10 && board[IdirY][IdirX] == 3) {
+            float okx = aRabbitPos.x;
+            float oky = aRabbitPos.y;
+            float ngx = dirX;
+            float ngy = dirY;
+//            printf("%d %f %f %f %f\n", board[sy][sx], aRabbitPos.x, aRabbitPos.y, dirX, dirY);
+            //                printf("%f %f\n",okx,oky);
+            //                printf("%f %f\n",ngx,ngy);
+            rep (i, 10) {
+                float midx = (okx + ngx) / 2;
+                float midy = (oky + ngy) / 2;
+                if (binarySearch(midx, midy, board[IdirY][IdirX])) {
+                    okx = midx;
+                    oky = midy;
                 } else {
-                    retGoal.x = gx + 0.5;
-                }
-            } else if (aRabbitPos.y <= gy) {
-                retGoal.y = gy + 0.01;
-                if (aRabbitPos.x >= tx + 1) {
-                    retGoal.x = gx + 0.99;
-                } else if (aRabbitPos.x <= gx) {
-                    retGoal.x = gx + 0.01;
-                } else {
-                    retGoal.x = gx + 0.5;
-                }
-            } else {
-                retGoal.y = gy + 0.5;
-                if (aRabbitPos.x >= gx + 1) {
-                    retGoal.x = gx + 0.99;
-                } else if (aRabbitPos.x <= gx) {
-                    retGoal.x = gx + 0.01;
-                } else {
-                    retGoal.x = gx + 0.5;
+                    ngx = midx;
+                    ngy = midy;
                 }
             }
-
-            float distanceGoal = sqrt((aRabbitPos.x - (retGoal.x)) * (aRabbitPos.x - (retGoal.x)) + (aRabbitPos.y - (retGoal.y)) * (aRabbitPos.y - (retGoal.y)));
-            if (distanceGoal <= can) return retGoal;
-
-
-
-
-
-            // if (id + 1 < warn) {
-            //     int fromX = min(sx, getX(path[id + 1]));
-            //     int fromY = min(sy, getY(path[id + 1]));
-            //     int toX = max(sx, getX(path[id + 1]));
-            //     int toY = max(sy, getY(path[id + 1]));
-            //     int tmpValue = (toY + 1 - fromY) * (toX + 1 - fromX) * 1.1;
-            //     if ((acc_sum_plain[toY + 1][toX + 1] + acc_sum_plain[fromY][fromX] - acc_sum_plain[toY + 1][fromX] - acc_sum_plain[fromY][toX + 1] <= tmpValue) || (acc_sum_bush[toY + 1][toX + 1] + acc_sum_bush[fromY][fromX] - acc_sum_bush[toY + 1][fromX] - acc_sum_bush[fromY][toX + 1] <= tmpValue) || (acc_sum_sand[toY + 1][toX + 1] + acc_sum_sand[fromY][fromX] - acc_sum_sand[toY + 1][fromX] - acc_sum_sand[fromY][toX + 1] <= tmpValue) || (acc_sum_pond[toY + 1][toX + 1] + acc_sum_pond[fromY][fromX] - acc_sum_pond[toY + 1][fromX] - acc_sum_pond[fromY][toX + 1] <= tmpValue)) {
-            //         id++;
-            //     }
-            // }
-
-
-            float distance = sqrt((aRabbitPos.x - (tx + 0.5)) * (aRabbitPos.x - (tx + 0.5)) + (aRabbitPos.y - (ty + 0.5)) * (aRabbitPos.y - (ty + 0.5)));
-            float dirX = (can * (tx + 0.5) + (distance - can) * aRabbitPos.x) / distance;
-            float dirY = (can * (ty + 0.5) + (distance - can) * aRabbitPos.y) / distance;
-            int IdirX = dirX;
-            int IdirY = dirY;
-
-
-            if (binaryFlag) {
-                binaryFlag = false;
-            } else if (distance <= can) {
-                Vector2 ret;
-                //                printf("%d\n",2);
-                ret.x = tx + 0.5;
-                ret.y = ty + 0.5;
-                    return ret;
-            } else if (board[sy][sx] != 1 && board[IdirY][IdirX] == 1) {
-                float okx = aRabbitPos.x;
-                float oky = aRabbitPos.y;
-                float ngx = dirX;
-                float ngy = dirY;
-//                printf("%f %f\n",okx,oky);
-//                printf("%f %f\n",ngx,ngy);
-                rep (i, 10) {
-                    float midx = (okx + ngx) / 2;
-                    float midy = (oky + ngy) / 2;
-                    if (binarySearch(midx, midy)) {
-                        okx = midx;
-                        oky = midy;
-                    } else {
-                        ngx = midx;
-                        ngy = midy;
-                    }
-                   
-                }
-//                printf("%d\n",3);
-//                printf("%f %f\n",okx,oky);
-                
-                binaryFlag = true;
-                Vector2 ret;
-                ret.x = okx;
-                ret.y = oky;
-                return ret;
-            }
-//            printf("%d\n",4);
+                        
+            
             Vector2 ret;
-            ret.x = path[id] % W + 0.5;
-            ret.y = path[id] / W + 0.5;
-//                printf("%d\n",1);
-//                printf("%f %f\n",ret.x,ret.y);
+            ret.x = okx;
+            ret.y = oky;
+            binaryFlag = true;
             return ret;
         }
+//        else if (board[sy][sx] == 10 && board[IdirY][IdirX] == 6) {
+//            float okx = aRabbitPos.x;
+//            float oky = aRabbitPos.y;
+//            float ngx = dirX;
+//            float ngy = dirY;
+//            //            printf("%d %f %f %f %f\n", board[sy][sx], aRabbitPos.x, aRabbitPos.y, dirX, dirY);
+//            //                printf("%f %f\n",okx,oky);
+//            //                printf("%f %f\n",ngx,ngy);
+//            rep (i, 10) {
+//                float midx = (okx + ngx) / 2;
+//                float midy = (oky + ngy) / 2;
+//                if (binarySearch(midx, midy, board[IdirY][IdirX])) {
+//                    okx = midx;
+//                    oky = midy;
+//                } else {
+//                    ngx = midx;
+//                    ngy = midy;
+//                }
+//            }
+//
+//
+//            Vector2 ret;
+//            ret.x = okx;
+//            ret.y = oky;
+//            binaryFlag = true;
+//            return ret;
+//        }
+        
+        Vector2 ret;
+        ret.x = path[id] % W + 0.5;
+        ret.y = path[id] / W + 0.5;
+//           printf("%d\n",1);
+        binaryFlag = false;
+        return ret;
+
+
+
+
+
+
+            
     } else {
         
 //        printf("%f %f\n",aRabbitPos.x,aRabbitPos.y);
@@ -805,12 +814,10 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
         }
             
         float distanceGoal = sqrt((aRabbitPos.x - (retGoal.x)) * (aRabbitPos.x - (retGoal.x)) + (aRabbitPos.y - (retGoal.y)) * (aRabbitPos.y - (retGoal.y)));
-        if (distanceGoal <= can) return retGoal;
-            
-
-
-
-
+        if (distanceGoal <= can) {
+            binaryFlag = false;
+            return retGoal;
+        }
 
 
 
@@ -822,25 +829,27 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
         int IdirY = dirY;
         
         
-        if (binaryFlag) {
-            binaryFlag = false;
-        } else if (distance <= can) {
+        
+        if (distance <= can) {
             Vector2 ret;
-            //                printf("%d\n",2);
             ret.x = tx + 0.5;
             ret.y = ty + 0.5;
+            binaryFlag = false;
             return ret;
+        } else if (binaryFlag) {
+            binaryFlag = false;
         } else if (board[sy][sx] != 1 && board[IdirY][IdirX] == 1) {
             float okx = aRabbitPos.x;
             float oky = aRabbitPos.y;
             float ngx = dirX;
             float ngy = dirY;
+//            printf("%d %f %f %f %f\n", board[sy][sx], aRabbitPos.x, aRabbitPos.y, dirX, dirY);
         //                printf("%f %f\n",okx,oky);
         //                printf("%f %f\n",ngx,ngy);
             rep (i, 10) {
                 float midx = (okx + ngx) / 2;
                 float midy = (oky + ngy) / 2;
-                if (binarySearch(midx, midy)) {
+                if (binarySearch(midx, midy, board[dirY][dirX])) {
                     okx = midx;
                     oky = midy;
                 } else {
@@ -849,23 +858,75 @@ Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
                 }
                 
             }
-        //                printf("%d\n",3);
-        //                printf("%f %f\n",okx,oky);
-                    
-            binaryFlag = true;
+            
             Vector2 ret;
             ret.x = okx;
             ret.y = oky;
+            binaryFlag = true;
+            return ret;
+        } else if (board[sy][sx] == 10 && board[IdirY][IdirX] == 3) {
+            float okx = aRabbitPos.x;
+            float oky = aRabbitPos.y;
+            float ngx = dirX;
+            float ngy = dirY;
+//            printf("%d %f %f %f %f\n", board[sy][sx], aRabbitPos.x, aRabbitPos.y, dirX, dirY);
+            //                printf("%f %f\n",okx,oky);
+                   //                printf("%f %f\n",ngx,ngy);
+            rep (i, 10) {
+                float midx = (okx + ngx) / 2;
+                float midy = (oky + ngy) / 2;
+                if (binarySearch(midx, midy, board[dirY][dirX])) {
+                    okx = midx;
+                    oky = midy;
+                } else {
+                    ngx = midx;
+                    ngy = midy;
+                }
+            }
+                               
+                   
+            Vector2 ret;
+            ret.x = okx;
+            ret.y = oky;
+            binaryFlag = true;
             return ret;
         }
-        
+//        else if (board[sy][sx] == 10 && board[IdirY][IdirX] == 6) {
+//            float okx = aRabbitPos.x;
+//            float oky = aRabbitPos.y;
+//            float ngx = dirX;
+//            float ngy = dirY;
+//            //            printf("%d %f %f %f %f\n", board[sy][sx], aRabbitPos.x, aRabbitPos.y, dirX, dirY);
+//                        //                printf("%f %f\n",okx,oky);
+//                               //                printf("%f %f\n",ngx,ngy);
+//            rep (i, 10) {
+//                float midx = (okx + ngx) / 2;
+//                float midy = (oky + ngy) / 2;
+//                if (binarySearch(midx, midy, board[dirY][dirX])) {
+//                    okx = midx;
+//                    oky = midy;
+//                } else {
+//                    ngx = midx;
+//                    ngy = midy;
+//                }
+//            }
+//
+//
+//            Vector2 ret;
+//            ret.x = okx;
+//            ret.y = oky;
+//            binaryFlag = true;
+//            return ret;
+//        }
+//
         
         
         
         
         Vector2 ret;
-        ret.x = path[id] % W + 0.5;
-        ret.y = path[id] / W + 0.5;
+        ret.x = tx + 0.5;
+        ret.y = ty + 0.5;
+        binaryFlag = false;
         return ret;
     }
 //    if (tx == (int)aPos.x && ty == (int)aPos.y && (gx != (int)p.x || gy != (int)p.y)) {
