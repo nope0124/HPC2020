@@ -28,11 +28,24 @@ struct edge{int to,cost;};
 #define ALL(a)  (a).begin(),(a).end()
 int dx[8] = {-1, 1, 0, 0, -1, -1, 1, 1};
 int dy[8] = {0, 0, -1, 1, -1, 1, -1, 1};
+int dx8[12] = {-2, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 2};
+int dy8[12] = {-1, 0, 1, -2, 2, -2, 2, -2, 2, -1, 0, 1};
+int dx12[16] = {-3, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 3};
+int dy12[16] = {-1, 0, 1, -2, 2, -3, 3, -3, 3, -3, 3, -2, 2, -1, 0, 1};
+int dx15[24] = {-4, -4, -4, -3, -3, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4};
+int dy15[24] = {-1, 0, 1, -3, -2, 2, 3, -3, 3, -4, 4, -4, 4, -4, 4, -3, 3, -3, -2, 2, 3, -1, 0, 1};
+int dx17[28] = {-5, -5, -5, -4, -4, -4, -4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4, 4, 5, 5, 5};
+int dy17[28] = {-1, 0, 1, -3, -2, 2, 3, -4, 4, -4, 4, -5, 5, -5, 5, -5, 5, -4, 4, -4, 4, -3, -2, 2, 3, -1, 0, 1};
 int INF = 1e9;
+
 
 //------------------------------------------------------------------------------
 namespace hpc {
 
+bool flag8 = true;
+bool flag12 = true;
+bool flag15 = true;
+bool flag17 = true;
 
 
 int H = 50, W = 50;
@@ -280,9 +293,15 @@ bool onBoard(int x, int y) {
     else return true;
 }
 
+int scrollCount = 1;
 
 void init(const Stage& aStage) {
 //    printf("\n");
+//    flag8 = true;
+//    flag12 = true;
+//    flag15 = true;
+//    flag17 = true;
+    scrollCount = 1;
     rep (i, H + 1) {
         acc_sum_plain[i][0] = 0;
         acc_sum_bush[i][0] = 0;
@@ -352,6 +371,8 @@ void init(const Stage& aStage) {
             }
         }
     }
+    
+    
 //    rep (i, H) {
 //        rep (j, W) {
 //            printf("%02d ",v[i][j]);
@@ -361,6 +382,82 @@ void init(const Stage& aStage) {
 //    printf("\n");
     
 }
+
+
+
+//void add_edge() {
+//    if (scrollCount == 8 && flag8) {
+////        printf("88888888\n");
+//        rep (i, H) {
+//            rep (j, W) {
+//                rep (k, 12) {
+//                    if (v[i][j] != 100) continue;
+//                    int nx = j + dx8[k];
+//                    int ny = i + dy8[k];
+//                    if (!onBoard(nx, ny)) continue;
+//                    edge tmp = {ny * W + nx, v[i][j]};
+//                    graph[i * W + j].push_back(tmp);
+//                }
+//            }
+//        }
+//        flag8 = false;
+//    }
+//    if (scrollCount == 12 && flag12) {
+////        printf("1212121212\n");
+//        rep (i, H) {
+//            rep (j, W) {
+//                rep (k, 16) {
+//                    if (v[i][j] != 100) continue;
+//                    int nx = j + dx12[k];
+//                    int ny = i + dy12[k];
+//                    if (!onBoard(nx, ny)) continue;
+//                    edge tmp = {ny * W + nx, v[i][j]};
+//                    graph[i * W + j].push_back(tmp);
+//                }
+//            }
+//        }
+//        flag12 = false;
+//    }
+//    if (scrollCount == 15 && flag15) {
+////        printf("1515151515\n");
+//        rep (i, H) {
+//            rep (j, W) {
+//                rep (k, 24) {
+//                    if (v[i][j] != 100) continue;
+//                    int nx = j + dx15[k];
+//                    int ny = i + dy15[k];
+//                    if (!onBoard(nx, ny)) continue;
+//                    edge tmp = {ny * W + nx, v[i][j]};
+//                    graph[i * W + j].push_back(tmp);
+//                }
+//            }
+//        }
+//        flag15 = false;
+//    }
+//
+//    if (scrollCount == 17 && flag17) {
+////        printf("17171717\n");
+//        rep (i, H) {
+//            rep (j, W) {
+//                rep (k, 28) {
+//                    if (v[i][j] != 100) continue;
+//                    int nx = j + dx17[k];
+//                    int ny = i + dy17[k];
+//                    if (!onBoard(nx, ny)) continue;
+//                    edge tmp = {ny * W + nx, v[i][j]};
+//                    graph[i * W + j].push_back(tmp);
+//                }
+//            }
+//        }
+//        flag17 = false;
+//    }
+//    return;
+//}
+//
+
+
+
+
 int count = 0;
 vector<vector<int> > dp((1LL << 21), vector<int>(21, INF)), tmpPos((1LL << 21), vector<int>(21, INF)), scrollDist(21, vector<int>(21, INF));
 vector<float> scrollPosX(21), scrollPosY(21);
@@ -436,7 +533,7 @@ vector<int> path;
 vector<int> newPath;
 int flag = 100;
 int id = 0;
-int scrollCount = 0;
+
 
 
 bool binarySearch(float nx, float ny, int n) {
@@ -451,6 +548,11 @@ bool binaryFlag = false;
 Vector2 solve(Vector2 aScrollPos, Vector2 aRabbitPos) {
     int sx = aRabbitPos.x;
     int sy = aRabbitPos.y;
+//    int cntcount = 0;
+//    rep (i, 2500) {
+//        cntcount += graph[i].size();
+//    }
+//    printf("%d\n",cntcount);
     float can = 1;
     rep (i, scrollCount) can *= 1.1;
     can *= (float)board[sy][sx] / 10;
@@ -1005,12 +1107,14 @@ void Answer::initialize(const Stage& aStage)////////////////////////////////////
 /// @return 移動の目標座標
 Vector2 Answer::getTargetPos(const Stage& aStage)
 {
-    
+//    printf("%d\n",scrollCount);
     auto pos = aStage.rabbit().pos();
     rep (i, count) {
         if (i == 0) continue;
+        
         if (aStage.scrolls()[next[i] - 1].isGotten()) continue;
         scrollCount = i;
+//        add_edge();
         Vector2 ret = solve(aStage.scrolls()[next[i] - 1].pos(), pos);
         int x = ret.x;
         int y = ret.y;
